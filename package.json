@@ -1,0 +1,30 @@
+{
+  "name": "minimux",
+  "version": "1.0.0",
+  "description": "A minimist state manager inspired by Redux",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stevendesu/minimux.git"
+  },
+  "keywords": [
+    "javascript"
+  ],
+  "author": "stevendesu <steven.abarnett@gmail.com>",
+  "license": "MITNFA",
+  "bugs": {
+    "url": "https://github.com/stevendesu/minimux/issues"
+  },
+  "homepage": "https://github.com/stevendesu/minimux#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.14.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-uglify": "^2.0.0"
+  }
+}
