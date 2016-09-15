@@ -1,7 +1,8 @@
 # Minimux #
------------
 
-v1.0.0
+>A minimist state management library (inspired by Redux)
+>
+>v1.0.0
 
 ## Description ##
 
@@ -9,6 +10,85 @@ Minimux was invented because I liked the ideology of Redux, but not the
 implementation. This is my attempt to rebuild Redux with absolute minimal
 functionality and to allow for absolute minimal bootstrapping in order to write
 effective code.
+
+## Requirements ##
+
+If you use `index.js`, it will require ES6 support. This means you can use it
+directly in NodeJS projects (Node v4 or later). If you use `index.min.js` then
+this has been pre-compiled with Babel and should run anywhere.
+
+If you use `index.js` and you intend to compile your code for the browser, you
+must run it through [Babel](https://babeljs.io/) or a similar tool to convert
+ES6 to ES5.
+
+For compatibility I think while I'm cleaning up the NPM stuff I'll create `src`
+and `dist` folders and make sure whatever is in the `dist` folder is only ES5.
+
+## Installation ##
+
+Currently the package is not hosted on NPM. I know -- I'm bad. I'm waiting to
+knock out the "TODOs" before posting it there. I also need to learn how to
+properly number things so that when someone puts `~1.0.0` in their package.json
+they aren't delivered `v1.1.0`
+
+For now, to install, please click "Clone or download" above and select "Download
+ZIP"
+
+You can extract this ZIP file anywhere you'd like. I tend to put it just above
+my root directory in a folder called "minimux"
+
+## Usage ##
+
+The following usage assumes you have installed this in `./minimux`. Once I have
+NPM stuff working correctly it will be slightly easier.
+
+**Actions:**
+
+```js
+// ./actions/index.js
+import { dispatch } from '../minimux';
+
+export function myAction() {
+	dispatch({ type: 'MY_ACTION' });
+}
+
+export function actionWithParams(params) {
+	return function() { dispatch({ type: 'PARAMS_ACTION', value: params }); };
+}
+
+// ./components/my-component.jsx
+import React from 'react';
+import { myAction, actionWithParams } from '../actions';
+
+class MyComponent extends React.Component {
+	render() {
+		return <input onKeyDown={myAction} onKeyPress={actionWithParams('abc')} />;
+	}
+}
+```
+
+**Reducers:**
+
+```js
+import { listen } from '../minimux';
+
+listen('PARAMS_ACTION', function(state, action) {
+	return { value: action.value };
+});
+```
+
+**Middleware:**
+
+```js
+import { apply } from '../minimux';
+
+apply(function(action, nextLayer) {
+	// Modify the action here for "pre" middleware
+	let state = nextLayer(action);
+	// Modify the state here for "post" middleware
+	return state;
+});
+```
 
 ## Why Not Redux? ##
 
@@ -260,3 +340,14 @@ hesitate to send me your pull requests!
 Since the purpose of this library is to be **minimist**, I don't plan to
 integrate all sorts of functionality into the core. I **do**, however, want to
 provide a multitude of "default" middleware to extend the functionality.
+
+## License ##
+
+**MIT +no-false-attribs**
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+Distributions of all or part of the Software intended to be used by the recipients as they would use the unmodified Software, containing modifications that substantially alter, remove, or disable functionality of the Software, outside of the documented configuration mechanisms provided by the Software, shall be modified such that the Original Author's bug reporting email addresses and urls are either replaced with the contact information of the parties responsible for the changes, or removed entirely.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
