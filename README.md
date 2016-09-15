@@ -77,6 +77,18 @@ listen('PARAMS_ACTION', function(state, action) {
 });
 ```
 
+**"Containers":**
+
+```js
+import { connect } from '../minimux';
+
+connect(ReadDOM.render(<App />, document.getElementById("container")));
+```
+
+Note: Minimux can only connect to **class components**. If `<App>` is a
+functional component then it must be refactored as a class component for the
+connect function to work.
+
 **Middleware:**
 
 ```js
