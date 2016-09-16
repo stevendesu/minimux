@@ -4,11 +4,24 @@
 >
 >v1.0.0
 
+## Table of Contents ##
+
+ - [Description](#description)
+ - [Requirements](#requriements)
+ - [Installation](#installation)
+ - [Usage](#usage)
+ - [Why Not Redux?](#why-not-redux)
+ - [Ideology](#ideology)
+ - [Better State Management](#better-state-management)
+ - [But What About (Insert Redux Feature) ???](#but-what-about-insert-redux-feature-)
+ - [Contributin'](#contributin)
+ - [License](#license)
+
 ## Description ##
 
 Minimux was invented because I liked the ideology of Redux, but not the
 implementation. This is my attempt to rebuild Redux with absolute minimal
-functionality and to allow for absolute minimal bootstrapping in order to write
+functionality and to allow for absolute minimal boilerplate in order to write
 effective code.
 
 ## Requirements ##
@@ -113,7 +126,7 @@ these two technologies.
 
 First, I learned React... and **I loved it**. Everything about it was perfect.
 It turned your HTML into self-contained components just like Angular or Polymer,
-but with 1/10th the bootstrapping of Angular and with twice the performance of
+but with 1/10th the boilerplate of Angular and with twice the performance of
 Polymer. The shadow DOM made apps blazingly fast no matter how many elements you
 put on the page, and the fact that state could be passed down to elements as
 properties... just amazing
