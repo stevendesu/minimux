@@ -17,10 +17,6 @@ exports.apply = apply;
  * implementation. This is my attempt to rebuild Redux with absolute minimal
  * functionality and to allow for absolute minimal bootstrapping in order to
  * write effective code.
- *
- * TODO (for anyone who wants to contribute):
- *  - There's currently no error handling or exception throwing. Pass an integer
- *    to dispatch() and the whole thing explodes
  * 
  * Considerations:
  *  - Two of our functions (connect and apply) are one-liners... why not just
@@ -55,7 +51,13 @@ function dispatch(action) {
 	var rerender = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
 	if ("development" === "development") {
-		console.log("Test");
+		// Incorrect usage of a library is going to break your code whether you
+		// throw an exception or not. The difference is, exceptions are very
+		// large strings of text (poor for minification) and mean nothing to
+		// end users. For this reason, I only throw exceptions in development.
+		// If you use the browser-compiled version (./minimux.js) intead of the
+		// NPM module, it assumes development mode.
+
 	}
 	if (callbackOnion === null) {
 		middleware.sort(function (a, b) {

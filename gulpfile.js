@@ -1,13 +1,19 @@
+// For NPM build
 var gulp = require("gulp");
 var sourcemaps = require("gulp-sourcemaps");
 var babel = require("gulp-babel");
 
+// For browser build
 var browserify = require("browserify");
 var envify = require("envify/custom");
 var source = require("vinyl-source-stream");
 var buffer = require("vinyl-buffer");
 var uglify = require("gulp-uglify");
 var rename = require("gulp-rename");
+
+// For bragging
+var ignore = require("gulp-ignore");
+var size = require("gulp-size");
 
 gulp.task("generate-npm-module", function() {
 	return gulp.src("src/index.js")
@@ -16,7 +22,22 @@ gulp.task("generate-npm-module", function() {
 			presets: ["es2015"]
 		}))
 		.pipe(sourcemaps.write("./"))
-		.pipe(gulp.dest("dist"));
+		.pipe(gulp.dest("dist"))
+		// Compute the minified size (for bragging rights)
+		.pipe(ignore(/\.map$/))
+		.pipe(size({
+			showFiles: true,
+			showTotal: false
+		}))
+		.pipe(uglify())
+		.pipe(rename({
+			suffix: ".min"
+		}))
+		.pipe(size({
+			showFiles: true,
+			showTotal: false,
+			gzip: true
+		}));
 });
 
 gulp.task("generate-browser-module", ["generate-npm-module"], function() {
@@ -29,12 +50,22 @@ gulp.task("generate-browser-module", ["generate-npm-module"], function() {
 		.pipe(buffer())
 		.pipe(sourcemaps.init())
 		.pipe(gulp.dest("./"))
+		.pipe(size({
+			showFiles: true,
+			showTotal: false
+		}))
 		.pipe(uglify())
 		.pipe(rename({
 			suffix: ".min"
 		}))
 		.pipe(sourcemaps.write("./"))
-		.pipe(gulp.dest("./"));
+		.pipe(gulp.dest("./"))
+		.pipe(ignore(/\.map$/))
+		.pipe(size({
+			showFiles: true,
+			showTotal: false,
+			gzip: true
+		}));
 });
 
 gulp.task("default", ["generate-browser-module"]);
