@@ -1,6 +1,6 @@
 # Minimux #
 
->A minimist state management library (inspired by Redux)
+>A minimalist state management library (inspired by Redux)
 >
 >v1.0.0
 >
@@ -203,7 +203,7 @@ that the state has changed**. You can update the count all day long but any
 For a state manager to be valuable, it needs to implement this one critical
 feature: **Event Dispatching**
 
-So to create a minimist state manager, I basically needed an event dispatcher.
+So to create a minimalist state manager, I basically needed an event dispatcher.
 When an action is thrown, update the state, then dispatch an event. Fortunately
 we don't have to re-invent the wheel: [Event dispatchers are well documented](https://github.com/millermedeiros/js-signals/wiki/Comparison-between-different-Observer-Pattern-implementations)
 
@@ -212,8 +212,8 @@ light-weight and simple, I favored the **Publish / Subscribe** pattern. Minimux
 acts as a broadcaster and you can subscribe (listen) or publish (dispatch) for
 any action.
 
-The major advantage to this minimist approach is that the amount of code you
-need to write in order to start using minimist is... well, **minimal**
+The major advantage to this minimalist approach is that the amount of code you
+need to write in order to start using Minimux is... well, **minimal**
 
 Consider the following using React-Redux:
 
@@ -364,7 +364,7 @@ maintaining it. If you find any issues, please open an issue and I'll try to
 respond when I can (usually at night). If you want to contribute, don't
 hesitate to send me your pull requests!
 
-Since the purpose of this library is to be **minimist**, I don't plan to
+Since the purpose of this library is to be **minimalist**, I don't plan to
 integrate all sorts of functionality into the core. I **do**, however, want to
 provide a multitude of "default" middleware to extend the functionality.
 
