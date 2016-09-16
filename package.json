@@ -1,6 +1,6 @@
 {
   "name": "minimux",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A minimist state manager inspired by Redux",
   "main": "dist/index.js",
   "scripts": {
@@ -11,7 +11,13 @@
     "url": "git+https://github.com/stevendesu/minimux.git"
   },
   "keywords": [
-    "elm", "flux", "redux", "functional", "predictable", "state", "reducer"
+    "elm",
+    "flux",
+    "redux",
+    "functional",
+    "predictable",
+    "state",
+    "reducer"
   ],
   "author": "stevendesu <steven.abarnett@gmail.com>",
   "license": "MITNFA",
