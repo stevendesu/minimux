@@ -38,16 +38,19 @@ to come later.
 
 ## Installation ##
 
-Currently the package is not hosted on NPM. I know -- I'm bad. I'm waiting to
-knock out the "TODOs" before posting it there. I also need to learn how to
-properly number things so that when someone puts `~1.0.0` in their package.json
-they aren't delivered `v1.1.0`
+The easiest way to get started with Minimux is using NPM:
 
-For now, to install, please click "Clone or download" above and select "Download
-ZIP"
+```
+npm install --save minimux
+```
 
-You can extract this ZIP file anywhere you'd like. I tend to put it just above
-my root directory in a folder called "minimux"
+After this, you can include Minimux as necessary in your project:
+
+```
+import * from 'minimux';
+```
+
+See [Usage](#usage) for further details on importing.
 
 ## Usage ##
 
