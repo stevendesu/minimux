@@ -3,6 +3,8 @@
 >A minimist state management library (inspired by Redux)
 >
 >v1.0.0
+>
+>Copyright 2016 Steven Barnett (stevendesu)
 
 ## Table of Contents ##
 
