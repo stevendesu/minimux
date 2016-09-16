@@ -20,7 +20,6 @@
  *  - Should it be possible to connect to a subset of the state? If you could
  *    bind reducers to subsets of state then it would be more modular
  *  - Could we add support for CJS, AMD, and UMD? Maybe as a build step?
- *  - 
  */
 
 export var state = {};
