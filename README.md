@@ -54,14 +54,10 @@ See [Usage](#usage) for further details on importing.
 
 ## Usage ##
 
-The following usage assumes you have installed this in `./minimux`. Once I have
-NPM stuff working correctly it will be slightly easier.
-
 **Actions:**
 
 ```js
-// ./actions/index.js
-import { dispatch } from '../minimux/dist';
+import { dispatch } from 'minimux';
 
 export function myAction() {
 	dispatch({ type: 'MY_ACTION' });
@@ -85,7 +81,7 @@ class MyComponent extends React.Component {
 **Reducers:**
 
 ```js
-import { listen } from '../minimux/dist';
+import { listen } from 'minimux';
 
 listen('PARAMS_ACTION', function(state, action) {
 	return { value: action.value };
@@ -95,7 +91,7 @@ listen('PARAMS_ACTION', function(state, action) {
 **"Containers":**
 
 ```js
-import { connect } from '../minimux/dist';
+import { connect } from 'minimux';
 
 connect(ReadDOM.render(<App />, document.getElementById("container")));
 ```
@@ -107,7 +103,7 @@ connect function to work.
 **Middleware:**
 
 ```js
-import { apply } from '../minimux/dist';
+import { apply } from 'minimux';
 
 apply(function(action, nextLayer) {
 	// Modify the action here for "pre" middleware
