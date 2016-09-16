@@ -22,10 +22,11 @@
  *  - Could we add support for CJS, AMD, and UMD? Maybe as a build step?
  */
 
-export var state = {};
 let listeners = {};
 let containers = [];
 let middleware = [];
+
+export var state = {};
 
 // The "onion" describes the layers of middleware that we must parse through
 // in order to execute our action.
@@ -41,16 +42,13 @@ const coreFunction = action => {
 }
 
 export function dispatch(action, rerender = true) {
+	if( process.env.NODE_ENV === "development" ) {
+		console.log("Test");
+	}
 	if( callbackOnion === null ) {
 		middleware.sort((a, b) => {
 			return a.priority - b.priority;
 		});
-		// This function isn't ugly on purpose. I just copied the functionality of
-		// PHP's Onion library (https://github.com/esbenp/onion/) and translated
-		// to JavaScript, leaving out unnecessary calls like call_user_func_array
-		//
-		// I'm open to anyone who can rewrite this to be a little more obvious
-		// what's going on
 		callbackOnion = middleware.reduce((nextLayer, layer) => {
 			return currentAction => {
 				return layer.func(currentAction, nextLayer);
