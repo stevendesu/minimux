@@ -340,7 +340,7 @@ Using middleware we can do things like:
 
 To implement middleware in the most minimal way possible, I look at PHP's [Onion Library](https://github.com/esbenp/onion)
 
-All of this for just **407 bytes minified and gzipped**
+All of this for just **537 bytes minified and gzipped**
 
 ## Contributin' ##
 
