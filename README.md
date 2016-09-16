@@ -13,16 +13,13 @@ effective code.
 
 ## Requirements ##
 
-If you use `index.js`, it will require ES6 support. This means you can use it
-directly in NodeJS projects (Node v4 or later). If you use `index.min.js` then
-this has been pre-compiled with Babel and should run anywhere.
+The only requirement at the moment (eventually should be removed) is React.
 
-If you use `index.js` and you intend to compile your code for the browser, you
-must run it through [Babel](https://babeljs.io/) or a similar tool to convert
-ES6 to ES5.
-
-For compatibility I think while I'm cleaning up the NPM stuff I'll create `src`
-and `dist` folders and make sure whatever is in the `dist` folder is only ES5.
+React is not required to manage state, dispatch actions, or attach listeners
+(reducers). However after all reducers have run and updated the state, the only
+method of broadcasting the new state currently is that any React component
+attached with the `connect` method will be re-rendered. Generic broadcasting
+to come later.
 
 ## Installation ##
 
@@ -46,7 +43,7 @@ NPM stuff working correctly it will be slightly easier.
 
 ```js
 // ./actions/index.js
-import { dispatch } from '../minimux';
+import { dispatch } from '../minimux/dist';
 
 export function myAction() {
 	dispatch({ type: 'MY_ACTION' });
@@ -70,7 +67,7 @@ class MyComponent extends React.Component {
 **Reducers:**
 
 ```js
-import { listen } from '../minimux';
+import { listen } from '../minimux/dist';
 
 listen('PARAMS_ACTION', function(state, action) {
 	return { value: action.value };
@@ -80,7 +77,7 @@ listen('PARAMS_ACTION', function(state, action) {
 **"Containers":**
 
 ```js
-import { connect } from '../minimux';
+import { connect } from '../minimux/dist';
 
 connect(ReadDOM.render(<App />, document.getElementById("container")));
 ```
@@ -92,7 +89,7 @@ connect function to work.
 **Middleware:**
 
 ```js
-import { apply } from '../minimux';
+import { apply } from '../minimux/dist';
 
 apply(function(action, nextLayer) {
 	// Modify the action here for "pre" middleware
