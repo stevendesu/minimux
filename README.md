@@ -46,11 +46,26 @@ npm install --save minimux
 
 After this, you can include Minimux as necessary in your project:
 
-```
+```js
 import * from 'minimux';
 ```
 
 See [Usage](#usage) for further details on importing.
+
+If you wish to utilize Minimux on a website without using NPM, that's fine,
+too! Minimux is built using Browserify, so in theory it should load if you
+include `minimux.js` or `minimux.min.js` on your page with a `<script>` tag:
+
+```html
+<script type="text/javascript" src="/path/to/minimux.min.js"></script>
+```
+
+It is recommended that if you use `minimux.min.js` you also host
+`minimux.min.js.map` and `minimus.js` in the same directory to enable source
+maps for easier debugging.
+
+Browserify also wrapped Minimux in some crazy header which I think is UMD? It
+may just be CommonJS or AMD, though.
 
 ## Usage ##
 
@@ -351,7 +366,7 @@ Using middleware we can do things like:
 
 To implement middleware in the most minimal way possible, I look at PHP's [Onion Library](https://github.com/esbenp/onion)
 
-All of this for just **537 bytes minified and gzipped**
+All of this for just **530 bytes minified and gzipped**
 
 ## Contributin' ##
 

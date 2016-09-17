@@ -20,6 +20,10 @@ exports.apply = apply;
  * functionality and to allow for absolute minimal bootstrapping in order to
  * write effective code.
  *
+ * Now that I've knocked out all of my "TODO"s, I'm officially calling this the
+ * end of "patches", and from now on a patch will only be a bugfix. Any feature
+ * additions will be minor updates.
+ *
  * Considerations:
  *  - Two of our functions (connect and apply) are one-liners... why not just
  *    make "containers" and "middleware" public?
@@ -27,7 +31,6 @@ exports.apply = apply;
  *  - How do you UNbind middleware or DISconnect containers? Or UNlisten?
  *  - Should it be possible to connect to a subset of the state? If you could
  *    bind reducers to subsets of state then it would be more modular
- *  - Could we add support for CJS, AMD, and UMD? Maybe as a build step?
  */
 
 var listeners = {};
