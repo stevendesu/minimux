@@ -17,8 +17,43 @@ var ignore = require("gulp-ignore");
 var replace = require("gulp-replace");
 var size = require("gulp-size");
 
+// To make middleware easier to import
+var fs = require("fs");
+
+function generateIndex(directory) {
+	var cwd = process.cwd();
+	process.chdir(directory);
+	var files = recurseDirectories();
+	// Our index file has a generic structure:
+	var indexFile = "";
+	for( var i = 0; i < files.length; i++ ) {
+		if( files[i] !== "./index.js" && /\.js$/.test(files[i]) ) {
+			indexFile += "module.exports." + files[i].slice(2, -3) + "Middleware = require(\"" + files[i].slice(0, -3) + "\");\n";
+		}
+	}
+	fs.writeFileSync("index.js", indexFile);
+	process.chdir(cwd);
+}
+
+function recurseDirectories() {
+	var allFiles = [];
+	function doRecurse(dir) {
+		var newFiles = fs.readdirSync(dir);
+		for( var i = 0; i < newFiles.length; i++ ) {
+			var fullPath = dir + '/' + newFiles[i];
+			if( fs.lstatSync(fullPath).isDirectory() ) {
+				doRecurse(fullPath);
+			} else {
+				allFiles.push(fullPath);
+			}
+		}
+	}
+	doRecurse(".");
+	return allFiles;
+}
+
 gulp.task("lint", function() {
-	return gulp.src("src/index.js")
+	return gulp.src("src/**/*.js")
 		.pipe(eslint({
 			rulePaths: ["eslint-rules"]
 		}))
@@ -53,7 +88,27 @@ gulp.task("generate-npm-module", ["lint"], function() {
 		}));
 });
 
-gulp.task("generate-browser-module", ["generate-npm-module"], function() {
+gulp.task("compile-middleware", ["generate-npm-module"], function() {
+	return gulp.src("src/middleware/*.js")
+		.pipe(sourcemaps.init())
+		.pipe(babel({
+			presets: ["es2015"]
+		}))
+		.pipe(sourcemaps.write("./"))
+		.pipe(gulp.dest("middleware"))
+		.pipe(ignore(/\.map$/))
+		.pipe(uglify())
+		.pipe(size({
+			showFiles: true,
+			showTotal: false,
+			gzip: true
+		}));
+});
+
+gulp.task("generate-browser-module", ["compile-middleware"], function() {
+	// Now that middleware is compiled we can generate the index
+	generateIndex("middleware");
+
 	return browserify("dist/index.js")
 		.transform(envify({
 			NODE_ENV: "development"

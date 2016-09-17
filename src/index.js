@@ -94,7 +94,11 @@ const dispatch = (action, rerender = true) => {
 	});
 	if (rerender) {
 		containers.forEach((el) => {
-			el.updater.enqueueForceUpdate(el);
+			if (typeof el === "function") {
+				el(state);
+			} else {
+				el.updater.enqueueForceUpdate(el);
+			}
 		});
 	}
 };
@@ -120,12 +124,17 @@ const listen = (type, callback) => {
 
 const connect = (container) => {
 	if (process.env.NODE_ENV !== "production") {
-		if (typeof container !== "object") {
+		if (typeof container !== "object" && typeof container !== "function") {
 			throw "Invalid type (" + (typeof container) + ") for argument \"container\" passed to listen. Expected " +
-			      "object.";
+			      "function (object accepted for now).";
 		}
-		// TODO: Test for ReactDOM.render() return value?
-		// Maybe not, actually. I want to get rid of that dependency...
+		// Importing React just to test instanceof means adding 14 kB of overhead for something I intend to deprecate
+		/*
+		if (typeof container === "object" && !container instanceof React.Component) {
+			throw "Invalid type (object) for argument \"container\" passed to listen. If an object is passed, it " +
+			      "must be an instance of React.Component."
+		}
+		*/
 	}
 	containers.push(container);
 };
