@@ -1,6 +1,6 @@
 {
   "name": "minimux",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A minimist state manager inspired by Redux",
   "main": "dist/index.js",
   "scripts": {
