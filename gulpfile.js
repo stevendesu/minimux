@@ -3,6 +3,7 @@ var gulp = require("gulp");
 var eslint = require("gulp-eslint");
 var sourcemaps = require("gulp-sourcemaps");
 var babel = require("gulp-babel");
+var replace = require("gulp-replace");
 
 // For browser build
 var browserify = require("browserify");
@@ -16,6 +17,7 @@ var rename = require("gulp-rename");
 var ignore = require("gulp-ignore");
 var replace = require("gulp-replace");
 var size = require("gulp-size");
+var gzip = require("gzip-size");
 
 // To make middleware easier to import
 var fs = require("fs");
@@ -52,6 +54,8 @@ function recurseDirectories() {
 	return allFiles;
 }
 
+var packageObj = JSON.parse(fs.readFileSync("package.json", "utf8"));
+
 gulp.task("lint", function() {
 	return gulp.src("src/**/*.js")
 		.pipe(eslint({
@@ -67,6 +71,7 @@ gulp.task("generate-npm-module", ["lint"], function() {
 		.pipe(babel({
 			presets: ["es2015"]
 		}))
+		.pipe(replace("%VERSION%", "v"+packageObj.version))
 		.pipe(sourcemaps.write("./"))
 		.pipe(gulp.dest("dist"))
 		// Compute the minified size (for bragging rights)
@@ -81,6 +86,7 @@ gulp.task("generate-npm-module", ["lint"], function() {
 		.pipe(rename({
 			suffix: ".min"
 		}))
+		.pipe(gulp.dest("tmp"))
 		.pipe(size({
 			showFiles: true,
 			showTotal: false,
@@ -94,6 +100,7 @@ gulp.task("compile-middleware", ["generate-npm-module"], function() {
 		.pipe(babel({
 			presets: ["es2015"]
 		}))
+		.pipe(replace("%VERSION%", "v"+packageObj.version))
 		.pipe(sourcemaps.write("./"))
 		.pipe(gulp.dest("middleware"))
 		.pipe(ignore(/\.map$/))
@@ -136,4 +143,15 @@ gulp.task("generate-browser-module", ["compile-middleware"], function() {
 		}));
 });
 
-gulp.task("default", ["generate-browser-module"]);
+gulp.task("update-readme", ["generate-browser-module"], function() {
+	var minifiedSize = gzip.sync(fs.readFileSync("tmp/index.min.js", "utf8"));
+	fs.unlinkSync("tmp/index.min.js");
+	fs.rmdirSync("tmp");
+	
+	gulp.src("src/README.md")
+		.pipe(replace("%VERSION%", "v"+packageObj.version))
+		.pipe(replace("%SIZE%", minifiedSize))
+		.pipe(gulp.dest("./"));
+});
+
+gulp.task("default", ["update-readme"]);

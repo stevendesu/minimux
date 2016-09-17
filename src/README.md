@@ -2,7 +2,7 @@
 
 >A minimalist state management library (inspired by Redux)
 >
->v1.0.2
+>%VERSION%
 >
 >Copyright 2016 Steven Barnett (stevendesu)
 
@@ -375,7 +375,7 @@ Using middleware we can do things like:
 
 To implement middleware in the most minimal way possible, I look at PHP's [Onion Library](https://github.com/esbenp/onion)
 
-All of this for just **573 bytes minified and gzipped**
+All of this for just **%SIZE% bytes minified and gzipped**
 
 ## Contributin' ##
 

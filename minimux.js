@@ -4,7 +4,7 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 /*
- * Minimux v1.0.0
+ * Minimux v1.0.2
  * Author: Steven Barnett (stevendesu) <steven.abarnett@gmail.com>
  * License: MIT +no-false-attribs (https://spdx.org/licenses/MITNFA.html)
  *

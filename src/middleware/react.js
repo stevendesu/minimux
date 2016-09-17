@@ -1,5 +1,5 @@
 /*
- * Minimux v1.0.0 - React Middleware
+ * Minimux %VERSION% - React Middleware
  * Author: Steven Barnett (stevendesu) <steven.abarnett@gmail.com>
  * License: MIT +no-false-attribs (https://spdx.org/licenses/MITNFA.html)
  *
