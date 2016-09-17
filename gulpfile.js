@@ -1,5 +1,6 @@
 // For NPM build
 var gulp = require("gulp");
+var eslint = require("gulp-eslint");
 var sourcemaps = require("gulp-sourcemaps");
 var babel = require("gulp-babel");
 
@@ -13,9 +14,19 @@ var rename = require("gulp-rename");
 
 // For bragging
 var ignore = require("gulp-ignore");
+var replace = require("gulp-replace");
 var size = require("gulp-size");
 
-gulp.task("generate-npm-module", function() {
+gulp.task("lint", function() {
+	return gulp.src("src/index.js")
+		.pipe(eslint({
+			rulePaths: ["eslint-rules"]
+		}))
+		.pipe(eslint.format())
+		.pipe(eslint.failAfterError());
+});
+
+gulp.task("generate-npm-module", ["lint"], function() {
 	return gulp.src("src/index.js")
 		.pipe(sourcemaps.init())
 		.pipe(babel({
@@ -29,6 +40,8 @@ gulp.task("generate-npm-module", function() {
 			showFiles: true,
 			showTotal: false
 		}))
+		// Good bragging rights should assume production-level compression
+		.pipe(replace("process.env.NODE_ENV", "\"production\""))
 		.pipe(uglify())
 		.pipe(rename({
 			suffix: ".min"

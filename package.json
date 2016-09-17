@@ -34,6 +34,7 @@
     "gulp-gzip": "^1.4.0",
     "gulp-ignore": "^2.0.1",
     "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
     "gulp-size": "^2.1.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^2.0.0",
