@@ -1,16 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-exports.dispatch = dispatch;
-exports.listen = listen;
-exports.connect = connect;
-exports.apply = apply;
 /*
  * Minimux v1.0.0
  * Author: Steven Barnett (stevendesu) <steven.abarnett@gmail.com>
@@ -38,7 +30,8 @@ var listeners = {};
 var containers = [];
 var middleware = [];
 
-var state = exports.state = {};
+var state = {};
+var mutableState = {};
 
 // The "onion" describes the layers of middleware that we must parse through
 // in order to execute our action.
@@ -47,13 +40,24 @@ var callbackOnion = null;
 var coreFunction = function coreFunction(action) {
 	if (listeners[action.type]) {
 		listeners[action.type].forEach(function (el) {
-			exports.state = state = el(state, action);
+			state = el(state, action);
+			// This is a temporary (and hideous) hack to maintain backwards compatibility until I'm happy enough with
+			// the API to release v2.0.0
+			// Previously you could "import { state } from 'minimux'" and it was properly updated
+			// This was poor practice because it allowed anyone to edit the state without using actions
+			// A getState() function has been added to return only the most recent immutable state
+			Object.keys(mutableState).forEach(function (key) {
+				delete mutableState[key];
+			});
+			Object.keys(state).forEach(function (key) {
+				mutableState[key] = state[key];
+			});
 		});
 	}
 	return state;
 };
 
-function dispatch(action) {
+var dispatch = function dispatch(action) {
 	var rerender = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
 	if ("development" !== "production") {
@@ -90,16 +94,16 @@ function dispatch(action) {
 		action = [action];
 	}
 	action.forEach(function (el) {
-		exports.state = state = callbackOnion(el);
+		state = callbackOnion(el);
 	});
 	if (rerender) {
 		containers.forEach(function (el) {
 			el.updater.enqueueForceUpdate(el);
 		});
 	}
-}
+};
 
-function listen(type, callback) {
+var listen = function listen(type, callback) {
 	if ("development" !== "production") {
 		if (typeof type !== "string") {
 			throw "Invalid type (" + (typeof type === "undefined" ? "undefined" : _typeof(type)) + ") for argument \"type\" passed to listen. Expected string.";
@@ -109,10 +113,15 @@ function listen(type, callback) {
 		}
 	}
 	listeners[type] = listeners[type] || [];
-	listeners[type].push(callback);
-}
+	var index = listeners[type].push(callback) - 1;
+	return {
+		remove: function remove() {
+			delete listeners[type][index];
+		}
+	};
+};
 
-function connect(container) {
+var connect = function connect(container) {
 	if ("development" !== "production") {
 		if ((typeof container === "undefined" ? "undefined" : _typeof(container)) !== "object") {
 			throw "Invalid type (" + (typeof container === "undefined" ? "undefined" : _typeof(container)) + ") for argument \"container\" passed to listen. Expected " + "object.";
@@ -121,9 +130,9 @@ function connect(container) {
 		// Maybe not, actually. I want to get rid of that dependency...
 	}
 	containers.push(container);
-}
+};
 
-function apply(newMiddleware) {
+var apply = function apply(newMiddleware) {
 	var priority = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
 	if ("development" !== "production") {
@@ -137,7 +146,21 @@ function apply(newMiddleware) {
 	middleware.unshift({ priority: priority, func: newMiddleware });
 	// Additional middleware was added. We need to recalulate this guy.
 	callbackOnion = null;
-}
+};
+
+var getState = function getState() {
+	return state;
+};
+
+// Switching to CommonJS allowed a bit better name mangling for dat mad compression
+module.exports = {
+	state: mutableState,
+	getState: getState,
+	dispatch: dispatch,
+	listen: listen,
+	connect: connect,
+	apply: apply
+};
 
 
 },{}]},{},[1]);

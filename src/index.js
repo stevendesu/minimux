@@ -25,7 +25,8 @@ const listeners = {};
 const containers = [];
 const middleware = [];
 
-export var state = {};
+let state = {};
+const mutableState = {};
 
 // The "onion" describes the layers of middleware that we must parse through
 // in order to execute our action.
@@ -35,12 +36,23 @@ const coreFunction = (action) => {
 	if (listeners[action.type]) {
 		listeners[action.type].forEach((el) => {
 			state = el(state, action);
+			// This is a temporary (and hideous) hack to maintain backwards compatibility until I'm happy enough with
+			// the API to release v2.0.0
+			// Previously you could "import { state } from 'minimux'" and it was properly updated
+			// This was poor practice because it allowed anyone to edit the state without using actions
+			// A getState() function has been added to return only the most recent immutable state
+			Object.keys(mutableState).forEach((key) => {
+				delete mutableState[key];
+			});
+			Object.keys(state).forEach((key) => {
+				mutableState[key] = state[key];
+			});
 		});
 	}
 	return state;
 };
 
-export function dispatch(action, rerender = true) {
+const dispatch = (action, rerender = true) => {
 	if (process.env.NODE_ENV !== "production") {
 		if (typeof action !== "object") {
 			throw "Invalid type (" + (typeof action) + ") for argument \"action\" passed to dispatch. Expected " +
@@ -85,9 +97,9 @@ export function dispatch(action, rerender = true) {
 			el.updater.enqueueForceUpdate(el);
 		});
 	}
-}
+};
 
-export function listen(type, callback) {
+const listen = (type, callback) => {
 	if (process.env.NODE_ENV !== "production") {
 		if (typeof type !== "string") {
 			throw "Invalid type (" + (typeof type) + ") for argument \"type\" passed to listen. Expected string.";
@@ -98,10 +110,15 @@ export function listen(type, callback) {
 		}
 	}
 	listeners[type] = listeners[type] || [];
-	listeners[type].push(callback);
-}
+	const index = listeners[type].push(callback) - 1;
+	return {
+		remove: () => {
+			delete listeners[type][index];
+		}
+	};
+};
 
-export function connect(container) {
+const connect = (container) => {
 	if (process.env.NODE_ENV !== "production") {
 		if (typeof container !== "object") {
 			throw "Invalid type (" + (typeof container) + ") for argument \"container\" passed to listen. Expected " +
@@ -111,9 +128,9 @@ export function connect(container) {
 		// Maybe not, actually. I want to get rid of that dependency...
 	}
 	containers.push(container);
-}
+};
 
-export function apply(newMiddleware, priority = 0) {
+const apply = (newMiddleware, priority = 0) => {
 	if (process.env.NODE_ENV !== "production") {
 		if (typeof newMiddleware !== "function") {
 			throw "Invalid type (" + (typeof newMiddleware) + ") for argument \"newMiddleware\" passed to listen. " +
@@ -127,4 +144,18 @@ export function apply(newMiddleware, priority = 0) {
 	middleware.unshift({ priority, func: newMiddleware });
 	// Additional middleware was added. We need to recalulate this guy.
 	callbackOnion = null;
-}
+};
+
+const getState = () => {
+	return state;
+};
+
+// Switching to CommonJS allowed a bit better name mangling for dat mad compression
+module.exports = {
+	state: mutableState,
+	getState,
+	dispatch,
+	listen,
+	connect,
+	apply
+};

@@ -2,13 +2,14 @@
 
 >A minimalist state management library (inspired by Redux)
 >
->v1.0.2
+>v1.1.0
 >
 >Copyright 2016 Steven Barnett (stevendesu)
 
 ## Table of Contents ##
 
  - [Description](#description)
+ - [Deprecated Features](#deprecated-features)
  - [Requirements](#requriements)
  - [Installation](#installation)
  - [Usage](#usage)
@@ -25,6 +26,14 @@ Minimux was invented because I liked the ideology of Redux, but not the
 implementation. This is my attempt to rebuild Redux with absolute minimal
 functionality and to allow for absolute minimal boilerplate in order to write
 effective code.
+
+## Deprecated Features ##
+
+These are features which are no longer supported and will be removed in the
+next major version of Minimux. If you use any of these features, you may want
+to modify your code to no longer depend on them.
+
+**No deprecated features (yet). Please check back regularly**
 
 ## Requirements ##
 
