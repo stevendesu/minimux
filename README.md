@@ -2,7 +2,7 @@
 
 >A minimalist state management library (inspired by Redux)
 >
->v1.0.2
+>v1.1.0
 >
 >Copyright 2016 Steven Barnett (stevendesu)
 
