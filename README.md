@@ -13,10 +13,10 @@
  - [Requirements](#requriements)
  - [Installation](#installation)
  - [Usage](#usage)
+ - [Using React Middleware](#using-react-middleware)
  - [Why Not Redux?](#why-not-redux)
  - [Ideology](#ideology)
- - [Better State Management](#better-state-management)
- - [But What About (Insert Redux Feature) ???](#but-what-about-insert-redux-feature-)
+ - [Extending Minimux](#extending-minimux)
  - [Contributin'](#contributin)
  - [License](#license)
 
@@ -27,23 +27,44 @@ implementation. This is my attempt to rebuild Redux with absolute minimal
 functionality and to allow for absolute minimal boilerplate in order to write
 effective code.
 
+Minimux is effectively built from two major components:
+
+ - A store for holding the current (immutable) state, which will broadcast
+   to callbacks when the state changes
+ - A middleware-wrapped state modifier using actions and reducers like Redux
+
+All of this for just **626 bytes minified and gzipped**
+
 ## Deprecated Features ##
 
 These are features which are no longer supported and will be removed in the
 next major version of Minimux. If you use any of these features, you may want
 to modify your code to no longer depend on them.
 
-**No deprecated features (yet). Please check back regularly**
+**Use of `listen` for reducers**
+
+While rethinking the interface for this library, it was fairly obvious that
+"listen" made more sense for containers than for reducers. Using "listen" for
+reducers will still work until version 2.0. The number of parameters passed
+is used to determine the intended use
+
+Reducers should now be bound with `register`
+
+**`connect` and `apply`**
+
+ - Connect has been replaced with `listen`
+ - Apply has been replaced with `use`
+
+**Passing React components directly to `listen` / `connect`**
+
+In order to update React components when the state updates, please see
+[Using React Middleware](#using-react-middleware)
 
 ## Requirements ##
 
-The only requirement at the moment (eventually should be removed) is React.
-
-React is not required to manage state, dispatch actions, or attach listeners
-(reducers). However after all reducers have run and updated the state, the only
-method of broadcasting the new state currently is that any React component
-attached with the `connect` method will be re-rendered. Generic broadcasting
-to come later.
+Minimux has absolutely no requirements. You can import it into your project and
+start using it without any additional node modules, without any external code,
+and without any hassle!
 
 ## Installation ##
 
@@ -70,25 +91,22 @@ include `minimux.js` or `minimux.min.js` on your page with a `<script>` tag:
 ```
 
 It is recommended that if you use `minimux.min.js` you also host
-`minimux.min.js.map` and `minimus.js` in the same directory to enable source
-maps for easier debugging.
+`minimux.min.js.map` in the same directory to enable source maps for easier
+debugging.
 
 Browserify also wrapped Minimux in some crazy header which I think is UMD? It
-may just be CommonJS or AMD, though.
+may just be CommonJS or AMD, though. Sorry, I haven't really tested the
+`<script>` tag usage.
 
 ## Usage ##
 
 **Actions:**
 
-```js
+```jsx
 import { dispatch } from 'minimux';
 
 export function myAction() {
 	dispatch({ type: 'MY_ACTION' });
-}
-
-export function actionWithParams(params) {
-	return function() { dispatch({ type: 'PARAMS_ACTION', value: params }); };
 }
 
 // ./components/my-component.jsx
@@ -97,7 +115,7 @@ import { myAction, actionWithParams } from '../actions';
 
 class MyComponent extends React.Component {
 	render() {
-		return <input onKeyDown={myAction} onKeyPress={actionWithParams('abc')} />;
+		return <input onKeyPress={myAction} />;
 	}
 }
 ```
@@ -105,31 +123,29 @@ class MyComponent extends React.Component {
 **Reducers:**
 
 ```js
-import { listen } from 'minimux';
+import { register } from 'minimux';
 
-listen('PARAMS_ACTION', function(state, action) {
-	return { value: action.value };
+register('MY_ACTION', function(state, action) {
+	return { value: state.value + 1 };
 });
 ```
 
-**"Containers":**
+**Callbacks:**
 
-```js
-import { connect } from 'minimux';
+```jsx
+import { listen } from 'minimux';
 
-connect(ReadDOM.render(<App />, document.getElementById("container")));
+listen(function(state) {
+	console.log(state);
+});
 ```
-
-Note: Minimux can only connect to **class components**. If `<App>` is a
-functional component then it must be refactored as a class component for the
-connect function to work.
 
 **Middleware:**
 
 ```js
-import { apply } from 'minimux';
+import { use } from 'minimux';
 
-apply(function(action, nextLayer) {
+use(function(action, nextLayer) {
 	// Modify the action here for "pre" middleware
 	let state = nextLayer(action);
 	// Modify the state here for "post" middleware
@@ -137,44 +153,42 @@ apply(function(action, nextLayer) {
 });
 ```
 
+## Using React Middleware ##
+
+To simplify using Minimux with React, it comes packages with middleware
+specifically for binding to React components.
+
+```jsx
+import { reactMiddleware } from 'minimux/middleware';
+// Alternative: import reactMiddleware from 'minimux/middleware/react';
+
+import { use } from 'minimux';
+
+use(reactMiddleware(ReactDOM.render(<App />, container)));
+```
+
+In order for the reactMiddleware to properly wire to the component it must be
+a class-based component. Functional components do not return anything from
+`ReactDOM.render()` and so there is no way to force them to re-render.
+
 ## Why Not Redux? ##
 
 If you're already using Redux, by all means: don't stop. It's a great library!
 
-If you have never used Redux before and you're new to the concept of using a
-library to manage your state, I believe that my library will prove more friendly
-to newbies and will get you up and running with far less code.
+While working with React-Redux I found a few features of the API that I didn't
+like. To name a few:
 
-This library started as a way to simplify a personal project of mine. I wanted
-to learn React+Redux so I decided to create a simple incremental game using
-these two technologies.
+ - Despite the docs saying you should **never** call `createStore` more than
+   once, nothing prevented it.
+ - Binding more than one reducer necessitated a strange "combining" function.
+ - Middleware was defined using a function which called a function which called
+   a function.
+ - React-Redux required two functions for mapping state and actions separately,
+   and introduced a `<Provider>` component
 
-First, I learned React... and **I loved it**. Everything about it was perfect.
-It turned your HTML into self-contained components just like Angular or Polymer,
-but with 1/10th the boilerplate of Angular and with twice the performance of
-Polymer. The shadow DOM made apps blazingly fast no matter how many elements you
-put on the page, and the fact that state could be passed down to elements as
-properties... just amazing
-
-Next, I learned Redux... it sounded **awesome**. You keep the full state of your
-app (or game, in my case) in one place, then using the component properites you
-hand it to the view and it's rendered by **stateless components**. Your view and
-your state are entirely separate and always in sync. If you gain a level you
-don't have to worry about the level over your head being correct but the level
-in the stats menu being wrong: there's a single source of truth
-
-Finally, I learned React-Redux. That pesky little library that binds the two
-together. At first it didn't feel... **that** bad... So instead of just
-components, if something is going to read state then it's a **container**...
-Okay, I can work with that. And then a container needs a mapping function to
-map the state to its properties... a bit awkward, but makes sense... But then
-you **also** need a mapping function to map **actions** to properties. Now it's
-getting silly... And then the whole thing didn't render because... I needed to
-wrap the whole app in some phony "Provider" component? Where did that come from?
-
-Suddenly React and Redux, both of which promised simplicity, felt like Angular:
-which promises magic but only if you're willing to scale the vertical learning
-curve. Personally? I wasn't willing. So I made this: **Minimux**
+I built my library organically adding features only as necessary and attempting
+to minimize the amount of code necessary to utilize those features. This "avoid
+boilerplate at all costs" mentality led to Minimux.
 
 ## Ideology ##
 
@@ -193,51 +207,12 @@ ensure that:
  2. You overwrite the state with a new "state" object when it's modified
  3. All modifications are done through "reducers"
 
-The simple Redux example of a counter with a `plus` and `minus` button could
-therefore be build without the use of Redux at all using the following code:
-
-```js
-var state = { count: 0 }; // Single source of truth
-
-function update(action) {
-	if( action == 1 ) {
-		state = { count: state.count + 1 }; // Overwrite the original object
-	} else {
-		state = { count: state.count - 1 };
-	}
-}
-
-document.write('<button onclick="update(1)">+</button> <button onclick="update(-1)">+</button>');
-```
-
-Although this is a poor way to manage state (discussed in the next section), it
-adhere to the three principles of Redux.
-
-## Better State Management ##
-
-Although additional concerns may be raised, the biggset issue with the code in
-the previous section is simple: **it offers no way to inform display elements
-that the state has changed**. You can update the count all day long but any
-`<span>` or `<p>` rendering the current state will sit blissfully unaware at 0
-
-For a state manager to be valuable, it needs to implement this one critical
-feature: **Event Dispatching**
-
-So to create a minimalist state manager, I basically needed an event dispatcher.
-When an action is thrown, update the state, then dispatch an event. Fortunately
-we don't have to re-invent the wheel: [Event dispatchers are well documented](https://github.com/millermedeiros/js-signals/wiki/Comparison-between-different-Observer-Pattern-implementations)
-
-As we want a **single source of truth**, and we want to keep this library
-light-weight and simple, I favored the **Publish / Subscribe** pattern. Minimux
-acts as a broadcaster and you can subscribe (listen) or publish (dispatch) for
-any action.
-
-The major advantage to this minimalist approach is that the amount of code you
-need to write in order to start using Minimux is... well, **minimal**
+My library attempts to adhere to this ideology with one additional parameter:
+**maximize the signal-to-noise ratio by minimizing boilerplate**
 
 Consider the following using React-Redux:
 
-```js
+```jsx
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider, connect } from 'react-redux';
@@ -299,19 +274,22 @@ class ActualCounter extends Component {
 ReactDOM.render(<Provider store={store}><CounterContainer /></Provider>, document.getElementById("container"));
 ```
 
-Holy **crap** that was a mouthful. Now let's do the same thing in Minimux:
+Holy **crap** that was a mouthful. In total that's 59 lines of code.
 
-```
+Now let's do the same thing in Minimux:
+
+```jsx
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { listen, dispatch, state } from 'minimux';
+import { register, dispatch, listen, use } from 'minimux';
+import { reactMiddleware } from 'minimux/middleware';
 
 // Reducers
-listen('INCREMENT', (state, action) => {
-	return { count: count + 1 };
+register('INCREMENT', (state, action) => {
+	return { count: state.count + 1 };
 });
-listen('DECREMENT', (state, action) => {
-	return { count: count + 1 };
+register('DECREMENT', (state, action) => {
+	return { count: state.count + 1 };
 });
 
 // Actions
@@ -329,42 +307,40 @@ class Counter extends Component {
 			<div>
 				<button onClick={increment}>+</button>
 				<button onClick={decrement}>-</button>
-				<p>{state.count}</p>
+				<p>{getState().count}</p>
 			</div>
 		);
 	}
 }
 
 // Render it all
-connect(ReactDOM.render(<Counter />, document.getElementById("container"));
+use(reactMiddleware(ReactDOM.render(<Counter />, document.getElementById("container"))));
 ```
 
-Notice that by connecting the root DOM node to Minimux we've **completely
-eliminated the need for containers**. By making the state available to any part
-of our code (via `import` statement) we avoid the mess of passing it through
-components. By keeping it simple, we reduce the overall code written to
-accomplish the same goal.
+We're down to 36 lines of code for identical functionality! This was done by:
 
-## But What About (Insert Redux Feature) ??? ##
+ - Eliminating the need to call `createStore`. Minimux holds the only store
+   and gives access to it via `getState()`
+ - Eliminating the mapping functions. If you need that level of indirection
+   you can still create mock element or mappings external to Minimux, but they
+   aren't required.
+ - Eliminating "containers". Minimux can bind directly to React components
 
-Many people who switched to Redux did so because it offered some absolutely
-magical abilities. Things like [time travel](https://github.com/gaearon/redux-devtools)
-become really simple.
+## Extending Minimux ##
 
-The same is possible with Minimux with a small adjustment. Since we follow the
-three core principles of Redux, the state can be calculated by re-running all
-reducers on a list of all past actions. Actions can be injected into this list
-or removed from this list and the calculations run to get the exact same
-behavior.
+Minimux provides the ability to add middleware to extend its functionality.
 
-At first I had the action list a core part of Minimux, but I soon realized that
-a videogame throwing events every tenth of a second from a timer and every time
-someone clicks button or moves the mouse would quickly flood the memory with
-events long-past that no one cares about anymore. I also realized that something
-like time travel and undo aren't core features of state management, but they're
-more like **add-ons**.
+Middleware wraps the reducers. When an action is thrown, it first passes
+through all middleware. This gives an opportunity to modify or completely
+reject the action before it reaches the reducers. After the reducers have
+modified the state, the new state is passed back through the middleware before
+it is saved to the store. This gives middleware an opportunity to modify the
+state before it's saved.
 
-For this reason, I expanded Minimux with [middleware](http://www.nixtu.info/2013/03/middleware-pattern-in-javascript.html)
+Essentially:
+
+ - Action goes in, state comes out
+ - Middleware can alter either en route
 
 Using middleware we can do things like:
 
@@ -374,8 +350,6 @@ Using middleware we can do things like:
  - Update the state after an action has occurred (consider: level up after experience is updated if experience exceeds a threshold)
 
 To implement middleware in the most minimal way possible, I look at PHP's [Onion Library](https://github.com/esbenp/onion)
-
-All of this for just **573 bytes minified and gzipped**
 
 ## Contributin' ##
 

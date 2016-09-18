@@ -8,21 +8,23 @@
  * functionality and to allow for absolute minimal bootstrapping in order to
  * write effective code.
  *
- * Now that I've knocked out all of my "TODO"s, I'm officially calling this the
- * end of "patches", and from now on a patch will only be a bugfix. Any feature
- * additions will be minor updates.
+ * There are four main API endpoints:
+ *  - dispatch(action, [data])
+ *     This is the only valid way to modify the state
+ *  - on(actions, reducer)
+ *     When an action is thrown, apply the reducers
+ *  - bind(callback)
+ *     Callback will be called with the current state whenever state changes
+ *  - apply(middleware, [priority])
+ *     Applies middleware to the dispatch function (see documentation)
  *
  * Considerations:
- *  - Two of our functions (connect and apply) are one-liners... why not just
- *    make "containers" and "middleware" public?
- *  - What should be the return values of each function?
- *  - How do you UNbind middleware or DISconnect containers? Or UNlisten?
  *  - Should it be possible to connect to a subset of the state? If you could
  *    bind reducers to subsets of state then it would be more modular
  */
 
-const listeners = {};
-const containers = [];
+const reducers = {};
+const callbacks = [];
 const middleware = [];
 
 let state = {};
@@ -33,8 +35,8 @@ const mutableState = {};
 let callbackOnion = null;
 
 const coreFunction = (action) => {
-	if (listeners[action.type]) {
-		listeners[action.type].forEach((el) => {
+	if (reducers[action.type]) {
+		reducers[action.type].forEach((el) => {
 			state = el(state, action);
 			// This is a temporary (and hideous) hack to maintain backwards compatibility until I'm happy enough with
 			// the API to release v2.0.0
@@ -93,7 +95,7 @@ const dispatch = (action, rerender = true) => {
 		state = callbackOnion(el);
 	});
 	if (rerender) {
-		containers.forEach((el) => {
+		callbacks.forEach((el) => {
 			if (typeof el === "function") {
 				el(state);
 			} else {
@@ -103,43 +105,82 @@ const dispatch = (action, rerender = true) => {
 	}
 };
 
-const listen = (type, callback) => {
+const register = (actions, reducer) => {
 	if (process.env.NODE_ENV !== "production") {
-		if (typeof type !== "string") {
-			throw "Invalid type (" + (typeof type) + ") for argument \"type\" passed to listen. Expected string.";
+		if (typeof actions !== "string" && (typeof actions !== "object" || !Array.isArray(actions))) {
+			throw "Invalid type (" + (typeof actions) + ") for argument \"actions\" passed to listen. Expected string.";
 		}
-		if (typeof callback !== "function") {
-			throw "Invalid type (" + (typeof callback) + ") for argument \"callback\" passed to listen. Expected " +
+		if (typeof reducer !== "function") {
+			throw "Invalid type (" + (typeof reducer) + ") for argument \"reducer\" passed to listen. Expected " +
 			      "function.";
 		}
 	}
-	listeners[type] = listeners[type] || [];
-	const index = listeners[type].push(callback) - 1;
-	return {
-		remove: () => {
-			delete listeners[type][index];
-		}
-	};
+	if (typeof actions === "string") {
+		actions = [actions];
+	}
+	actions.forEach((action) => {
+		reducers[action] = reducers[action] || [];
+		reducers[action].push(reducer);
+	});
 };
 
-const connect = (container) => {
+// https://www.reddit.com/r/javascript/comments/538wgm/suggestions_for_optimal_api_for_a_minimalist/
+// /user/Strobljus made a good point that the ability to unbind middleware (or reducers) is effectively putting state
+// into the middleware (and reducer) lists - instead of keeping all state in the store
+/*
+const unregister = (actions, reducer) => {
 	if (process.env.NODE_ENV !== "production") {
-		if (typeof container !== "object" && typeof container !== "function") {
-			throw "Invalid type (" + (typeof container) + ") for argument \"container\" passed to listen. Expected " +
+		if (typeof actions !== "string" && (typeof actions !== "object" || !Array.isArray(actions))) {
+			throw "Invalid type (" + (typeof actions) + ") for argument \"actions\" passed to listen. Expected string.";
+		}
+		if (typeof reducer !== "function") {
+			throw "Invalid type (" + (typeof reducer) + ") for argument \"reducer\" passed to listen. Expected " +
+			      "function.";
+		}
+	}
+	if (typeof actions === "string") {
+		actions = [actions];
+	}
+	actions.forEach((action) => {
+		const index = reducers[action].indexOf(reducer);
+		if (index !== -1) {
+			reducers[action].splice(index, 1);
+		}
+	});
+};
+*/
+
+const listen = (callback, reducer) => {
+	if (reducer) {
+		// Old, deprecated interpretation of "listen"
+		return register(callback, reducer);
+	}
+	// New, spiffy interpretation of "listen"
+	if (process.env.NODE_ENV !== "production") {
+		if (typeof callback !== "object" && typeof callback !== "function") {
+			throw "Invalid type (" + (typeof callback) + ") for argument \"callback\" passed to listen. Expected " +
 			      "function (object accepted for now).";
 		}
 		// Importing React just to test instanceof means adding 14 kB of overhead for something I intend to deprecate
 		/*
-		if (typeof container === "object" && !container instanceof React.Component) {
-			throw "Invalid type (object) for argument \"container\" passed to listen. If an object is passed, it " +
+		if (typeof callback === "object" && !callback instanceof React.Component) {
+			throw "Invalid type (object) for argument \"callback\" passed to listen. If an object is passed, it " +
 			      "must be an instance of React.Component."
 		}
 		*/
 	}
-	containers.push(container);
+	callbacks.push(callback);
+};
+const connect = listen;
+
+const unlisten = (callback) => {
+	const index = callbacks.indexOf(callback);
+	if (index !== -1) {
+		callbacks.splice(index, 1);
+	}
 };
 
-const apply = (newMiddleware, priority = 0) => {
+const use = (newMiddleware, priority = 0) => {
 	if (process.env.NODE_ENV !== "production") {
 		if (typeof newMiddleware !== "function") {
 			throw "Invalid type (" + (typeof newMiddleware) + ") for argument \"newMiddleware\" passed to listen. " +
@@ -154,6 +195,7 @@ const apply = (newMiddleware, priority = 0) => {
 	// Additional middleware was added. We need to recalulate this guy.
 	callbackOnion = null;
 };
+const apply = use;
 
 const getState = () => {
 	return state;
@@ -164,7 +206,11 @@ module.exports = {
 	state: mutableState,
 	getState,
 	dispatch,
+	register,
+	//unregister,
 	listen,
-	connect,
-	apply
+	unlisten,
+	use,
+	connect, // Deprecated
+	apply // Deprecated
 };
