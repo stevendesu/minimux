@@ -281,7 +281,7 @@ Now let's do the same thing in Minimux:
 ```jsx
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { register, dispatch, listen, use } from 'minimux';
+import { register, dispatch, getState, use } from 'minimux';
 import { reactMiddleware } from 'minimux/middleware';
 
 // Reducers
