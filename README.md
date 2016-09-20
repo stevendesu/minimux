@@ -20,6 +20,7 @@
  - [Contributin'](#contributin)
  - [License](#license)
 
+
 ## Description ##
 
 Minimux was invented because I liked the ideology of Redux, but not the
@@ -32,6 +33,7 @@ Minimux is effectively built from two major components:
  - A store for holding the current (immutable) state, which will broadcast
    to callbacks when the state changes
  - A middleware-wrapped state modifier using actions and reducers like Redux
+
 
 All of this for just **626 bytes minified and gzipped**
 
@@ -54,6 +56,7 @@ Reducers should now be bound with `register`
 
  - Connect has been replaced with `listen`
  - Apply has been replaced with `use`
+
 
 **Passing React components directly to `listen` / `connect`**
 
@@ -186,6 +189,7 @@ like. To name a few:
  - React-Redux required two functions for mapping state and actions separately,
    and introduced a `<Provider>` component
 
+
 I built my library organically adding features only as necessary and attempting
 to minimize the amount of code necessary to utilize those features. This "avoid
 boilerplate at all costs" mentality led to Minimux.
@@ -198,6 +202,7 @@ There are three guiding principles behind Redux:
  2. State is read-only
  3. Changes are made with pure functions
 
+
 Each of these principles, you'll notice, has nothing to do with the Redux
 library in particular. They are a set of best-practices that can be followed by
 any code base without the need of an external library. All you need to do is
@@ -206,6 +211,7 @@ ensure that:
  1. You only have one global "state" object
  2. You overwrite the state with a new "state" object when it's modified
  3. All modifications are done through "reducers"
+
 
 My library attempts to adhere to this ideology with one additional parameter:
 **maximize the signal-to-noise ratio by minimizing boilerplate**
@@ -281,7 +287,7 @@ Now let's do the same thing in Minimux:
 ```jsx
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { register, dispatch, listen, use } from 'minimux';
+import { register, dispatch, getState, use } from 'minimux';
 import { reactMiddleware } from 'minimux/middleware';
 
 // Reducers
@@ -326,6 +332,7 @@ We're down to 36 lines of code for identical functionality! This was done by:
    aren't required.
  - Eliminating "containers". Minimux can bind directly to React components
 
+
 ## Extending Minimux ##
 
 Minimux provides the ability to add middleware to extend its functionality.
@@ -342,12 +349,14 @@ Essentially:
  - Action goes in, state comes out
  - Middleware can alter either en route
 
+
 Using middleware we can do things like:
 
  - Record all actions before (or after) they are processed in order to undo / time travel
  - Prevent an action based on the state
  - Modify an action in flight or throw errors for invalid actions
  - Update the state after an action has occurred (consider: level up after experience is updated if experience exceeds a threshold)
+
 
 To implement middleware in the most minimal way possible, I look at PHP's [Onion Library](https://github.com/esbenp/onion)
 
