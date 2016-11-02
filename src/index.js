@@ -9,18 +9,14 @@
  * write effective code.
  *
  * There are four main API endpoints:
- *  - dispatch(action, [data])
+ *  - dispatch([actions])
  *     This is the only valid way to modify the state
- *  - on(actions, reducer)
+ *  - register([actions], reducer)
  *     When an action is thrown, apply the reducers
- *  - bind(callback)
+ *  - listen(callbacks)
  *     Callback will be called with the current state whenever state changes
- *  - apply(middleware, [priority])
+ *  - use(middleware, [priority])
  *     Applies middleware to the dispatch function (see documentation)
- *
- * Considerations:
- *  - Should it be possible to connect to a subset of the state? If you could
- *    bind reducers to subsets of state then it would be more modular
  */
 
 const reducers = {};
