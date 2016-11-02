@@ -2,7 +2,7 @@
 
 >A minimalist state management library (inspired by Redux)
 >
->v1.1.0
+>v2.0.0
 >
 >Copyright 2016 Steven Barnett (stevendesu)
 
@@ -35,7 +35,7 @@ Minimux is effectively built from two major components:
  - A middleware-wrapped state modifier using actions and reducers like Redux
 
 
-All of this for just **626 bytes minified and gzipped**
+All of this for just **543 bytes minified and gzipped**
 
 ## Deprecated Features ##
 
@@ -112,13 +112,20 @@ export function myAction() {
 	dispatch({ type: 'MY_ACTION' });
 }
 
+export function actionWithParams(params) {
+	// Currying allows params to be passed at render-time but processed at event-time
+	return function() {
+		dispatch({ type: 'PARAMS_ACTION', params: params });
+	}
+}
+
 // ./components/my-component.jsx
 import React from 'react';
 import { myAction, actionWithParams } from '../actions';
 
 class MyComponent extends React.Component {
 	render() {
-		return <input onKeyPress={myAction} />;
+		return <input onKeyPress={myAction} onChange={actionWithParams('asdf')} />;
 	}
 }
 ```
