@@ -43,25 +43,7 @@ These are features which are no longer supported and will be removed in the
 next major version of Minimux. If you use any of these features, you may want
 to modify your code to no longer depend on them.
 
-**Use of `listen` for reducers**
-
-While rethinking the interface for this library, it was fairly obvious that
-"listen" made more sense for containers than for reducers. Using "listen" for
-reducers will still work until version 2.0. The number of parameters passed
-is used to determine the intended use
-
-Reducers should now be bound with `register`
-
-**`connect` and `apply`**
-
- - Connect has been replaced with `listen`
- - Apply has been replaced with `use`
-
-
-**Passing React components directly to `listen` / `connect`**
-
-In order to update React components when the state updates, please see
-[Using React Middleware](#using-react-middleware)
+**No features deprecated yet as of %VERSION%**
 
 ## Requirements ##
 
