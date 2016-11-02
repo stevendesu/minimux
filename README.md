@@ -106,6 +106,7 @@ may just be CommonJS or AMD, though. Sorry, I haven't really tested the
 **Actions:**
 
 ```jsx
+// ./actions/index.js
 import { dispatch } from 'minimux';
 
 export function myAction() {
@@ -132,19 +133,31 @@ class MyComponent extends React.Component {
 
 **Reducers:**
 
-```js
+```jsx
 import { register } from 'minimux';
 
 register('MY_ACTION', function(state, action) {
 	return { value: state.value + 1 };
+});
+
+register('PARAMS_ACTION', function(state, action) {
+	return { value: action.params };
 });
 ```
 
 **Callbacks:**
 
 ```jsx
-import { listen } from 'minimux';
+import { listen, unlisten } from 'minimux';
 
+var myListener = function(state) {
+	console.log(state);
+};
+
+listen(myListener);
+unlisten(myListener);
+
+// If you never plan to unlisten:
 listen(function(state) {
 	console.log(state);
 });
@@ -152,20 +165,23 @@ listen(function(state) {
 
 **Middleware:**
 
-```js
+```jsx
 import { use } from 'minimux';
 
 use(function(action, nextLayer) {
 	// Modify the action here for "pre" middleware
+	if(action.type == 'PARAMS_ACTION') { action.params = 'neat'; }
 	let state = nextLayer(action);
 	// Modify the state here for "post" middleware
+	// Note: middleware is allowed to directly modify state
+	state.value += 7;
 	return state;
 });
 ```
 
 ## Using React Middleware ##
 
-To simplify using Minimux with React, it comes packages with middleware
+To simplify using Minimux with React, it comes packaged with middleware
 specifically for binding to React components.
 
 ```jsx
@@ -335,7 +351,7 @@ We're down to 36 lines of code for identical functionality! This was done by:
  - Eliminating the need to call `createStore`. Minimux holds the only store
    and gives access to it via `getState()`
  - Eliminating the mapping functions. If you need that level of indirection
-   you can still create mock element or mappings external to Minimux, but they
+   you can still create mock element for mappings external to Minimux, but they
    aren't required.
  - Eliminating "containers". Minimux can bind directly to React components
 
@@ -359,13 +375,16 @@ Essentially:
 
 Using middleware we can do things like:
 
- - Record all actions before (or after) they are processed in order to undo / time travel
+ - Record all actions before (or after) they are processed in order to undo /
+   time travel
  - Prevent an action based on the state
  - Modify an action in flight or throw errors for invalid actions
- - Update the state after an action has occurred (consider: level up after experience is updated if experience exceeds a threshold)
+ - Update the state after an action has occurred (consider: level up after
+   experience is updated if experience exceeds a threshold)
 
 
-To implement middleware in the most minimal way possible, I look at PHP's [Onion Library](https://github.com/esbenp/onion)
+To implement middleware in the most minimal way possible, I look at PHP's
+[Onion Library](https://github.com/esbenp/onion)
 
 ## Contributin' ##
 
@@ -382,9 +401,28 @@ provide a multitude of "default" middleware to extend the functionality.
 
 **MIT +no-false-attribs**
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
-Distributions of all or part of the Software intended to be used by the recipients as they would use the unmodified Software, containing modifications that substantially alter, remove, or disable functionality of the Software, outside of the documented configuration mechanisms provided by the Software, shall be modified such that the Original Author's bug reporting email addresses and urls are either replaced with the contact information of the parties responsible for the changes, or removed entirely.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Distributions of all or part of the Software intended to be used by the
+recipients as they would use the unmodified Software, containing modifications
+that substantially alter, remove, or disable functionality of the Software,
+outside of the documented configuration mechanisms provided by the Software,
+shall be modified such that the Original Author's bug reporting email addresses
+and urls are either replaced with the contact information of the parties
+responsible for the changes, or removed entirely.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

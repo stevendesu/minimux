@@ -15,7 +15,6 @@ var rename = require("gulp-rename");
 
 // For bragging
 var ignore = require("gulp-ignore");
-var replace = require("gulp-replace");
 var size = require("gulp-size");
 var gzip = require("gzip-size");
 
