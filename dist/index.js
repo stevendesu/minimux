@@ -3,7 +3,7 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 /*
- * Minimux v2.0.0
+ * Minimux v2.0.1
  * Author: Steven Barnett (stevendesu) <steven.abarnett@gmail.com>
  * License: MIT +no-false-attribs (https://spdx.org/licenses/MITNFA.html)
  *
@@ -56,9 +56,9 @@ var register = function register(actions, reducer) {
 		}
 		// For loops are faster than forEach
 		for (var i = 0, len = actions.length; i < len; i++) {
-			var _action = actions[i];
-			reducers[_action] = reducers[_action] || [];
-			reducers[_action].push(reducer);
+			var action = actions[i];
+			reducers[action] = reducers[action] || [];
+			reducers[action].push(reducer);
 		}
 	}
 };
@@ -95,8 +95,8 @@ var coreFunction = function coreFunction(action) {
 
 var dispatch = function dispatch(actions) {
 	if (process.env.NODE_ENV !== "production") {
-		if ((typeof action === "undefined" ? "undefined" : _typeof(action)) !== "object") {
-			throw "Invalid type (" + (typeof action === "undefined" ? "undefined" : _typeof(action)) + ") for argument \"action\" passed to dispatch. Expected " + "object or array of objects.";
+		if ((typeof actions === "undefined" ? "undefined" : _typeof(actions)) !== "object") {
+			throw "Invalid type (" + (typeof actions === "undefined" ? "undefined" : _typeof(actions)) + ") for argument \"action\" passed to dispatch. Expected " + "object or array of objects.";
 		}
 		if (isArray(actions)) {
 			actions.forEach(function (el, idx) {

@@ -92,8 +92,8 @@ const coreFunction = (action) => {
 
 const dispatch = (actions) => {
 	if (process.env.NODE_ENV !== "production") {
-		if (typeof action !== "object") {
-			throw "Invalid type (" + (typeof action) + ") for argument \"action\" passed to dispatch. Expected " +
+		if (typeof actions !== "object") {
+			throw "Invalid type (" + (typeof actions) + ") for argument \"action\" passed to dispatch. Expected " +
 			      "object or array of objects.";
 		}
 		if (isArray(actions)) {
