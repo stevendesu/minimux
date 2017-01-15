@@ -84,7 +84,7 @@ const coreFunction = (action) => {
 	if (reducers[action.type]) {
 		// For loops are faster than forEach
 		for (let i = 0, len = reducers[action.type].length; i < len; i++) {
-			newState = reducers[action.type](newState, action);
+			newState = reducers[action.type][i](newState, action);
 		}
 	}
 	return newState;

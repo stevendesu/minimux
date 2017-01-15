@@ -35,7 +35,7 @@ Minimux is effectively built from two major components:
  - A middleware-wrapped state modifier using actions and reducers like Redux
 
 
-All of this for just **543 bytes minified and gzipped**
+All of this for just **545 bytes minified and gzipped**
 
 ## Deprecated Features ##
 
