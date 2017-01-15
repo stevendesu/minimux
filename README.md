@@ -2,7 +2,7 @@
 
 >A minimalist state management library (inspired by Redux)
 >
->v2.0.1
+>v2.0.2
 >
 >Copyright 2016 Steven Barnett (stevendesu)
 
@@ -43,7 +43,7 @@ These are features which are no longer supported and will be removed in the
 next major version of Minimux. If you use any of these features, you may want
 to modify your code to no longer depend on them.
 
-**No features deprecated yet as of v2.0.1**
+**No features deprecated yet as of v2.0.2**
 
 ## Requirements ##
 
